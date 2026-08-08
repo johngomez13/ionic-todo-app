@@ -1,0 +1,7 @@
+dist
+www
+platforms
+plugins
+coverage
+.angular
+package-lock.json
