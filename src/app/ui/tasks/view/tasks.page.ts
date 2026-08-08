@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonButton,
@@ -8,14 +8,20 @@ import {
   IonIcon,
   IonInput,
   IonItem,
+  IonLabel,
   IonList,
+  IonNote,
+  IonSegment,
+  IonSegmentButton,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { trashOutline } from 'ionicons/icons';
-import { TASK_REPOSITORY } from '@application/providers/task.provider';
-import { Task, createTask, normalizeTitle, toggleCompletion } from '@domain/models/task.model';
+import { normalizeTitle } from '@domain/models/task.model';
+import { TaskStatusFilter } from '@domain/services/task-filters';
+import { formatPendingLabel, resolveEmptyMessage, toTaskView } from '@ui/tasks/shared/helpers/task-view.helper';
+import { TaskStore } from '../state/task.store';
 import { TaskView } from './model/task-view.model';
 
 @Component({
@@ -31,46 +37,56 @@ import { TaskView } from './model/task-view.model';
     IonIcon,
     IonInput,
     IonItem,
+    IonLabel,
     IonList,
+    IonNote,
+    IonSegment,
+    IonSegmentButton,
     IonTitle,
     IonToolbar,
   ],
 })
 export default class TasksPage {
-  private readonly taskRepository = inject(TASK_REPOSITORY);
-  readonly tasks = signal<Task[]>(this.taskRepository.getAll());
-  readonly draft = signal('');
-  readonly isEmpty = computed(() => this.tasks().length === 0);
-  readonly canAddTask = computed(() => normalizeTitle(this.draft()).length > 0);
-  readonly taskViews = computed<TaskView[]>(() =>
-    this.tasks().map((task) => ({ ...task, removeLabel: `Eliminar ${task.title}` })),
+  private readonly store = inject(TaskStore);
+  public readonly draft = signal('');
+  public readonly statusFilter = this.store.statusFilter;
+  public readonly visibleTasks = computed<TaskView[]>(() => this.store.visibleTasks().map(toTaskView));
+  public readonly canAddTask = computed(() => normalizeTitle(this.draft()).length > 0);
+  public readonly pendingLabel = computed(() => formatPendingLabel(this.store.pendingCount()));
+  public readonly emptyMessage = computed(() =>
+    resolveEmptyMessage(this.store.tasks().length, this.visibleTasks().length),
   );
 
   constructor() {
     addIcons({ trashOutline });
-    effect(() => {
-      this.taskRepository.save(this.tasks());
-    });
   }
 
-  onDraftChange(value: string): void {
+  public onDraftChange(value: string): void {
     this.draft.set(value);
   }
 
-  addTask(): void {
-    const title = normalizeTitle(this.draft());
+  public addTask(): void {
+    if (!this.canAddTask()) return;
 
-    if (title.length === 0) return;
-
-    this.tasks.update((tasks) => [...tasks, createTask(title)]);
+    this.store.addTask(this.draft());
     this.draft.set('');
   }
 
-  toggleTask(id: string): void {
-    this.tasks.update((tasks) => tasks.map((task) => (task.id === id ? toggleCompletion(task) : task)));
+  public toggleTask(id: string): void {
+    this.store.toggleTask(id);
   }
 
-  removeTask(id: string): void {
-    this.tasks.update((tasks) => tasks.filter((task) => task.id !== id));
+  public removeTask(id: string): void {
+    this.store.removeTask(id);
+  }
+
+  public onFilterChange(event: Event): void {
+    const { value } = (event as CustomEvent<{ value?: unknown }>).detail;
+
+    if (value === 'all' || value === 'pending' || value === 'completed') this.setStatusFilter(value);
+  }
+
+  public setStatusFilter(filter: TaskStatusFilter): void {
+    this.store.setStatusFilter(filter);
   }
 }

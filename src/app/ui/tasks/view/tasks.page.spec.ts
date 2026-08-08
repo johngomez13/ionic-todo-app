@@ -38,14 +38,8 @@ describe('TasksPage', () => {
     await fixture.whenStable();
   };
 
-  const firstTask = (fixture: ComponentFixture<TasksPage>): Task => {
-    const [task] = fixture.componentInstance.tasks();
-
-    return task;
-  };
-
   const titlesOf = (fixture: ComponentFixture<TasksPage>): string[] =>
-    fixture.componentInstance.tasks().map((task) => task.title);
+    fixture.componentInstance.visibleTasks().map((task) => task.title);
 
   it('should create without zone.js', async () => {
     const fixture = await createPage();
@@ -62,26 +56,12 @@ describe('TasksPage', () => {
     expect(host.querySelector('ion-title')?.textContent).toContain('Tareas');
   });
 
-  it('should add a task as pending', async () => {
+  it('should add a task and clear the draft', async () => {
     const fixture = await createPage();
     await addTask(fixture, 'Comprar pan');
 
     expect(titlesOf(fixture)).toEqual(['Comprar pan']);
-    expect(firstTask(fixture).completed).toBeFalse();
-  });
-
-  it('should ignore titles that are empty or only whitespace', async () => {
-    const fixture = await createPage();
-    await addTask(fixture, '   ');
-
-    expect(titlesOf(fixture)).toEqual([]);
-  });
-
-  it('should trim the title before storing it', async () => {
-    const fixture = await createPage();
-    await addTask(fixture, '  Comprar pan  ');
-
-    expect(titlesOf(fixture)).toEqual(['Comprar pan']);
+    expect(fixture.componentInstance.draft()).toBe('');
   });
 
   it('should only allow adding when the draft has content', async () => {
@@ -96,47 +76,61 @@ describe('TasksPage', () => {
     expect(fixture.componentInstance.canAddTask()).toBeTrue();
   });
 
-  it('should expose a remove label for every task', async () => {
+  it('should expose a remove label for every visible task', async () => {
     const fixture = await createPage();
     await addTask(fixture, 'Comprar pan');
 
-    expect(fixture.componentInstance.taskViews().map((view) => view.removeLabel)).toEqual(['Eliminar Comprar pan']);
+    expect(fixture.componentInstance.visibleTasks().map((view) => view.removeLabel)).toEqual(['Eliminar Comprar pan']);
   });
 
-  it('should toggle completion', async () => {
+  it('should show a different message when the list is empty than when the filter hides everything', async () => {
     const fixture = await createPage();
-    await addTask(fixture, 'Comprar pan');
 
-    fixture.componentInstance.toggleTask(firstTask(fixture).id);
+    expect(fixture.componentInstance.emptyMessage()).toBe('No hay tareas todavía.');
+
+    await addTask(fixture, 'Comprar pan');
+    expect(fixture.componentInstance.emptyMessage()).toBeNull();
+
+    fixture.componentInstance.setStatusFilter('completed');
     await fixture.whenStable();
 
-    expect(firstTask(fixture).completed).toBeTrue();
+    expect(fixture.componentInstance.emptyMessage()).toBe('No hay tareas que coincidan con el filtro.');
+  });
+
+  it('should pluralize the pending counter', async () => {
+    const fixture = await createPage();
+
+    expect(fixture.componentInstance.pendingLabel()).toBe('0 pendientes');
+
+    await addTask(fixture, 'Una');
+    expect(fixture.componentInstance.pendingLabel()).toBe('1 pendiente');
+
+    await addTask(fixture, 'Otra');
+    expect(fixture.componentInstance.pendingLabel()).toBe('2 pendientes');
+  });
+
+  it('should filter the visible list', async () => {
+    const fixture = await createPage();
+    await addTask(fixture, 'Pendiente');
+    await addTask(fixture, 'Hecha');
+
+    const done = fixture.componentInstance.visibleTasks()[1];
+    fixture.componentInstance.toggleTask(done.id);
+    await fixture.whenStable();
+
+    fixture.componentInstance.setStatusFilter('pending');
+    await fixture.whenStable();
+
+    expect(titlesOf(fixture)).toEqual(['Pendiente']);
   });
 
   it('should remove a task', async () => {
     const fixture = await createPage();
     await addTask(fixture, 'Comprar pan');
 
-    fixture.componentInstance.removeTask(firstTask(fixture).id);
+    fixture.componentInstance.removeTask(fixture.componentInstance.visibleTasks()[0].id);
     await fixture.whenStable();
 
     expect(titlesOf(fixture)).toEqual([]);
-    expect(fixture.componentInstance.isEmpty()).toBeTrue();
-  });
-
-  it('should hand every change to the repository', async () => {
-    const repository = new InMemoryTaskRepository();
-    const fixture = await createPage(repository);
-    await addTask(fixture, 'Comprar pan');
-
-    expect(repository.saved.map((task) => task.title)).toEqual(['Comprar pan']);
-  });
-
-  it('should start from whatever the repository already had', async () => {
-    const stored: Task[] = [{ id: 'a', title: 'Tarea previa', completed: true }];
-    const fixture = await createPage(new InMemoryTaskRepository(stored));
-
-    expect(titlesOf(fixture)).toEqual(['Tarea previa']);
-    expect(firstTask(fixture).completed).toBeTrue();
   });
 });

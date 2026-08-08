@@ -1,6 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>Tareas</ion-title>
+    <ion-note slot="end" class="ion-padding-end">{{ pendingLabel() }}</ion-note>
   </ion-toolbar>
 </ion-header>
 
@@ -20,11 +21,23 @@
     </ion-item>
   </form>
 
-  @if (isEmpty()) {
-  <p class="ion-padding ion-text-center">No hay tareas todavía.</p>
+  <ion-segment [value]="statusFilter()" (ionChange)="onFilterChange($event)">
+    <ion-segment-button value="all">
+      <ion-label>Todas</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="pending">
+      <ion-label>Pendientes</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="completed">
+      <ion-label>Completadas</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  @if (emptyMessage(); as message) {
+  <p class="ion-padding ion-text-center">{{ message }}</p>
   } @else {
   <ion-list>
-    @for (task of taskViews(); track task.id) {
+    @for (task of visibleTasks(); track task.id) {
     <ion-item>
       <ion-checkbox justify="start" labelPlacement="end" [checked]="task.completed" (ionChange)="toggleTask(task.id)">
         {{ task.title }}

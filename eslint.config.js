@@ -39,6 +39,10 @@ module.exports = tseslint.config(
         { allowExpressions: true, allowTypedFunctionExpressions: true, allowHigherOrderFunctions: true },
       ],
       '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+      '@typescript-eslint/explicit-member-accessibility': [
+        'error',
+        { accessibility: 'explicit', overrides: { constructors: 'no-public' } },
+      ],
       'import/no-cycle': 'error',
       'unused-imports/no-unused-imports': 'error',
       '@typescript-eslint/no-unused-vars': 'off',
