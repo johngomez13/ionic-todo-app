@@ -1,14 +1,29 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import TasksPage, { Task } from './tasks.page';
+import { TASK_REPOSITORY } from '@application/providers/task.provider';
+import { Task } from '@domain/models/task.model';
+import { TaskRepository } from '@domain/repositories/task.repository';
+import TasksPage from './tasks.page';
 
-const STORAGE_KEY = 'todo.tasks';
+class InMemoryTaskRepository implements TaskRepository {
+  public saved: Task[] = [];
+
+  constructor(private readonly stored: Task[] = []) {}
+
+  public getAll(): Task[] {
+    return [...this.stored];
+  }
+
+  public save(tasks: readonly Task[]): void {
+    this.saved = [...tasks];
+  }
+}
 
 describe('TasksPage', () => {
-  const createPage = async (): Promise<ComponentFixture<TasksPage>> => {
+  const createPage = async (repository = new InMemoryTaskRepository()): Promise<ComponentFixture<TasksPage>> => {
     await TestBed.configureTestingModule({
       imports: [TasksPage],
-      providers: [provideZonelessChangeDetection()],
+      providers: [provideZonelessChangeDetection(), { provide: TASK_REPOSITORY, useValue: repository }],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(TasksPage);
@@ -18,7 +33,7 @@ describe('TasksPage', () => {
   };
 
   const addTask = async (fixture: ComponentFixture<TasksPage>, title: string): Promise<void> => {
-    fixture.componentInstance.draft = title;
+    fixture.componentInstance.onDraftChange(title);
     fixture.componentInstance.addTask();
     await fixture.whenStable();
   };
@@ -31,14 +46,6 @@ describe('TasksPage', () => {
 
   const titlesOf = (fixture: ComponentFixture<TasksPage>): string[] =>
     fixture.componentInstance.tasks().map((task) => task.title);
-
-  beforeEach(() => {
-    localStorage.clear();
-  });
-
-  afterEach(() => {
-    localStorage.clear();
-  });
 
   it('should create without zone.js', async () => {
     const fixture = await createPage();
@@ -77,6 +84,25 @@ describe('TasksPage', () => {
     expect(titlesOf(fixture)).toEqual(['Comprar pan']);
   });
 
+  it('should only allow adding when the draft has content', async () => {
+    const fixture = await createPage();
+
+    expect(fixture.componentInstance.canAddTask()).toBeFalse();
+
+    fixture.componentInstance.onDraftChange('  ');
+    expect(fixture.componentInstance.canAddTask()).toBeFalse();
+
+    fixture.componentInstance.onDraftChange('Comprar pan');
+    expect(fixture.componentInstance.canAddTask()).toBeTrue();
+  });
+
+  it('should expose a remove label for every task', async () => {
+    const fixture = await createPage();
+    await addTask(fixture, 'Comprar pan');
+
+    expect(fixture.componentInstance.taskViews().map((view) => view.removeLabel)).toEqual(['Eliminar Comprar pan']);
+  });
+
   it('should toggle completion', async () => {
     const fixture = await createPage();
     await addTask(fixture, 'Comprar pan');
@@ -95,31 +121,22 @@ describe('TasksPage', () => {
     await fixture.whenStable();
 
     expect(titlesOf(fixture)).toEqual([]);
+    expect(fixture.componentInstance.isEmpty()).toBeTrue();
   });
 
-  it('should persist tasks in localStorage', async () => {
-    const fixture = await createPage();
+  it('should hand every change to the repository', async () => {
+    const repository = new InMemoryTaskRepository();
+    const fixture = await createPage(repository);
     await addTask(fixture, 'Comprar pan');
 
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as Task[];
-
-    expect(stored.map((task) => task.title)).toEqual(['Comprar pan']);
+    expect(repository.saved.map((task) => task.title)).toEqual(['Comprar pan']);
   });
 
-  it('should restore tasks persisted by a previous session', async () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([{ id: 'a', title: 'Tarea previa', completed: true }]));
-
-    const fixture = await createPage();
+  it('should start from whatever the repository already had', async () => {
+    const stored: Task[] = [{ id: 'a', title: 'Tarea previa', completed: true }];
+    const fixture = await createPage(new InMemoryTaskRepository(stored));
 
     expect(titlesOf(fixture)).toEqual(['Tarea previa']);
     expect(firstTask(fixture).completed).toBeTrue();
-  });
-
-  it('should start empty when the stored data is corrupt', async () => {
-    localStorage.setItem(STORAGE_KEY, 'esto no es json');
-
-    const fixture = await createPage();
-
-    expect(titlesOf(fixture)).toEqual([]);
   });
 });

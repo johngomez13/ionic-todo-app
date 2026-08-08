@@ -13,17 +13,18 @@
         labelPlacement="stacked"
         placeholder="¿Qué hay que hacer?"
         autocomplete="off"
-        [(ngModel)]="draft"
+        [ngModel]="draft()"
+        (ngModelChange)="onDraftChange($event)"
       />
-      <ion-button slot="end" type="submit" [disabled]="draft.trim().length === 0">Agregar</ion-button>
+      <ion-button slot="end" type="submit" [disabled]="!canAddTask()">Agregar</ion-button>
     </ion-item>
   </form>
 
-  @if (tasks().length === 0) {
+  @if (isEmpty()) {
   <p class="ion-padding ion-text-center">No hay tareas todavía.</p>
   } @else {
   <ion-list>
-    @for (task of tasks(); track task.id) {
+    @for (task of taskViews(); track task.id) {
     <ion-item>
       <ion-checkbox justify="start" labelPlacement="end" [checked]="task.completed" (ionChange)="toggleTask(task.id)">
         {{ task.title }}
@@ -32,7 +33,7 @@
         slot="end"
         fill="clear"
         color="medium"
-        [attr.aria-label]="'Eliminar ' + task.title"
+        [attr.aria-label]="task.removeLabel"
         (click)="removeTask(task.id)"
       >
         <ion-icon slot="icon-only" name="trash-outline" />

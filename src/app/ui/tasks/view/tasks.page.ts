@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonButton,
@@ -14,35 +14,9 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { trashOutline } from 'ionicons/icons';
-
-export interface Task {
-  readonly id: string;
-  title: string;
-  completed: boolean;
-}
-
-const STORAGE_KEY = 'todo.tasks';
-
-/**
- * Lee las tareas persistidas. Ante datos corruptos devuelve una lista vacía en lugar
- * de propagar la excepción: perder el estado guardado es preferible a que la
- * aplicación no arranque.
- */
-function readStoredTasks(): Task[] {
-  const raw = localStorage.getItem(STORAGE_KEY);
-
-  if (raw === null) {
-    return [];
-  }
-
-  try {
-    const parsed: unknown = JSON.parse(raw);
-
-    return Array.isArray(parsed) ? (parsed as Task[]) : [];
-  } catch {
-    return [];
-  }
-}
+import { TASK_REPOSITORY } from '@application/providers/task.provider';
+import { Task, createTask, normalizeTitle, toggleCompletion } from '@domain/models/task.model';
+import { TaskView } from './model/task-view.model';
 
 @Component({
   selector: 'app-tasks',
@@ -63,35 +37,37 @@ function readStoredTasks(): Task[] {
   ],
 })
 export default class TasksPage {
-  readonly tasks = signal<Task[]>(readStoredTasks());
-
-  draft = '';
+  private readonly taskRepository = inject(TASK_REPOSITORY);
+  readonly tasks = signal<Task[]>(this.taskRepository.getAll());
+  readonly draft = signal('');
+  readonly isEmpty = computed(() => this.tasks().length === 0);
+  readonly canAddTask = computed(() => normalizeTitle(this.draft()).length > 0);
+  readonly taskViews = computed<TaskView[]>(() =>
+    this.tasks().map((task) => ({ ...task, removeLabel: `Eliminar ${task.title}` })),
+  );
 
   constructor() {
     addIcons({ trashOutline });
-
-    // La persistencia se deriva de la lista en vez de repetirse en cada operación,
-    // de modo que ninguna mutación futura pueda olvidarse de guardar.
     effect(() => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.tasks()));
+      this.taskRepository.save(this.tasks());
     });
   }
 
+  onDraftChange(value: string): void {
+    this.draft.set(value);
+  }
+
   addTask(): void {
-    const title = this.draft.trim();
+    const title = normalizeTitle(this.draft());
 
-    if (title.length === 0) {
-      return;
-    }
+    if (title.length === 0) return;
 
-    this.tasks.update((tasks) => [...tasks, { id: crypto.randomUUID(), title, completed: false }]);
-    this.draft = '';
+    this.tasks.update((tasks) => [...tasks, createTask(title)]);
+    this.draft.set('');
   }
 
   toggleTask(id: string): void {
-    this.tasks.update((tasks) =>
-      tasks.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task)),
-    );
+    this.tasks.update((tasks) => tasks.map((task) => (task.id === id ? toggleCompletion(task) : task)));
   }
 
   removeTask(id: string): void {
