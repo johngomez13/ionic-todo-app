@@ -1,0 +1,142 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Tareas</ion-title>
+    <ion-note slot="end" class="ion-padding-end">{{ pendingLabel() }}</ion-note>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Tareas</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="page">
+    <div class="chips" role="group" aria-label="Categoría activa">
+      @for (chip of chips(); track chip.value) {
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="categoryFilter() === chip.value"
+        [attr.aria-pressed]="categoryFilter() === chip.value"
+        [attr.aria-label]="chip.selectLabel"
+        (click)="selectCategory(chip.value)"
+      >
+        @if (chip.color; as color) {
+        <span class="dot" [style.background-color]="color" aria-hidden="true"></span>
+        }
+        <span class="chip-label">{{ chip.label }}</span>
+        <span class="chip-count">{{ chip.count }}</span>
+      </button>
+      }
+    </div>
+
+    @if (isAdding()) {
+    <form class="add" (ngSubmit)="addTask()">
+      <ion-item lines="none">
+        <ion-input
+          name="title"
+          aria-label="Nueva tarea"
+          placeholder="Nueva tarea…"
+          autocomplete="off"
+          [ngModel]="draft()"
+          (ngModelChange)="onDraftChange($event)"
+        />
+        <ion-button slot="end" type="submit" size="small" [disabled]="!canAddTask()">Agregar</ion-button>
+        <ion-button slot="end" size="small" fill="clear" color="medium" (click)="cancelAdding()">Listo</ion-button>
+      </ion-item>
+    </form>
+    } @if (emptyMessage(); as message) {
+    <p class="empty">{{ message }}</p>
+    } @if (pendingTasks().length > 0) {
+    <ion-list>
+      @for (task of pendingTasks(); track task.id) {
+      <ion-item>
+        @if (assigningId() === task.id) {
+        <ion-radio-group
+          class="picker"
+          [value]="task.categoryId ?? 'none'"
+          (ionChange)="onAssignChange(task.id, $event)"
+        >
+          @for (option of assignOptions(); track option.value) {
+          <ion-radio [value]="option.value" labelPlacement="end" justify="start">
+            @if (option.color; as color) {
+            <span class="dot" [style.background-color]="color" aria-hidden="true"></span>
+            } {{ option.label }}
+          </ion-radio>
+          }
+        </ion-radio-group>
+        <ion-button slot="end" fill="clear" color="medium" aria-label="Cancelar" (click)="cancelAssign()">
+          Cancelar
+        </ion-button>
+        } @else {
+        <ion-checkbox justify="start" labelPlacement="end" [checked]="task.completed" (ionChange)="toggleTask(task.id)">
+          <span class="task-title">{{ task.title }}</span>
+          @if (showsCategoryOnRow() && task.categoryName) {
+          <span class="task-meta">
+            <span class="dot" [style.background-color]="task.categoryColor" aria-hidden="true"></span>
+            {{ task.categoryName }}
+          </span>
+          }
+        </ion-checkbox>
+        <ion-button
+          slot="end"
+          fill="clear"
+          color="medium"
+          [attr.aria-label]="task.assignLabel"
+          (click)="startAssign(task.id)"
+        >
+          <ion-icon slot="icon-only" name="pricetag-outline" />
+        </ion-button>
+        <ion-button
+          slot="end"
+          fill="clear"
+          color="medium"
+          [attr.aria-label]="task.removeLabel"
+          (click)="removeTask(task.id)"
+        >
+          <ion-icon slot="icon-only" name="trash-outline" />
+        </ion-button>
+        }
+      </ion-item>
+      }
+    </ion-list>
+    } @if (hasCompleted()) {
+    <ion-item button lines="none" class="disclosure" (click)="toggleCompleted()">
+      <ion-icon
+        slot="start"
+        size="small"
+        [name]="showCompleted() ? 'chevron-down-outline' : 'chevron-forward-outline'"
+      />
+      <ion-label>{{ completedLabel() }}</ion-label>
+    </ion-item>
+
+    @if (showCompleted()) {
+    <ion-list>
+      @for (task of completedTasks(); track task.id) {
+      <ion-item>
+        <ion-checkbox justify="start" labelPlacement="end" [checked]="task.completed" (ionChange)="toggleTask(task.id)">
+          <span class="task-title task-title--done">{{ task.title }}</span>
+        </ion-checkbox>
+        <ion-button
+          slot="end"
+          fill="clear"
+          color="medium"
+          [attr.aria-label]="task.removeLabel"
+          (click)="removeTask(task.id)"
+        >
+          <ion-icon slot="icon-only" name="trash-outline" />
+        </ion-button>
+      </ion-item>
+      }
+    </ion-list>
+    } }
+  </div>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button aria-label="Nueva tarea" (click)="startAdding()">
+      <ion-icon name="add-outline" />
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

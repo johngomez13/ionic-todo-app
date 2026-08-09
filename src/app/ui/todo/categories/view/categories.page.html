@@ -1,0 +1,98 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tasks" />
+    </ion-buttons>
+    <ion-title>Categorías</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="page">
+    <form (ngSubmit)="addCategory()">
+      <ion-item lines="none">
+        <ion-input
+          name="categoryName"
+          label="Nueva categoría"
+          labelPlacement="stacked"
+          placeholder="Nombre de la categoría"
+          autocomplete="off"
+          [ngModel]="draftName()"
+          (ngModelChange)="onDraftNameChange($event)"
+        />
+        <ion-button slot="end" type="submit" [disabled]="!canAddCategory()">Agregar</ion-button>
+      </ion-item>
+
+      <div class="field">
+        <span class="field-label">Color</span>
+        <ion-radio-group class="picker" [value]="draftColor()" (ionChange)="onDraftColorChange($event)">
+          @for (color of colors; track color.value) {
+          <ion-radio [value]="color.value" labelPlacement="end" justify="start">
+            <span class="dot" [style.background-color]="color.value" aria-hidden="true"></span>
+            {{ color.label }}
+          </ion-radio>
+          }
+        </ion-radio-group>
+      </div>
+
+      @if (nameError(); as error) {
+      <ion-note color="danger" class="field-error">{{ error }}</ion-note>
+      }
+    </form>
+
+    @if (emptyMessage(); as message) {
+    <p class="ion-padding ion-text-center">{{ message }}</p>
+    } @else {
+    <ion-list>
+      @for (category of categories(); track category.id) {
+      <ion-item>
+        @if (editingId() === category.id) {
+        <ion-input
+          name="editingName"
+          aria-label="Nuevo nombre"
+          autocomplete="off"
+          [ngModel]="editingName()"
+          (ngModelChange)="onEditingNameChange($event)"
+        />
+        <ion-button
+          slot="end"
+          fill="clear"
+          aria-label="Confirmar"
+          [disabled]="!canConfirmRename()"
+          (click)="confirmRename()"
+        >
+          <ion-icon slot="icon-only" name="checkmark-outline" />
+        </ion-button>
+        <ion-button slot="end" fill="clear" color="medium" aria-label="Cancelar" (click)="cancelRename()">
+          <ion-icon slot="icon-only" name="close-outline" />
+        </ion-button>
+        } @else {
+        <span class="dot dot--large" [style.background-color]="category.color" aria-hidden="true"></span>
+        <ion-label>{{ category.name }}</ion-label>
+        <ion-button
+          slot="end"
+          fill="clear"
+          color="medium"
+          [attr.aria-label]="category.renameLabel"
+          (click)="startRename(category)"
+        >
+          <ion-icon slot="icon-only" name="create-outline" />
+        </ion-button>
+        <ion-button
+          slot="end"
+          fill="clear"
+          color="medium"
+          [attr.aria-label]="category.removeLabel"
+          (click)="removeCategory(category.id)"
+        >
+          <ion-icon slot="icon-only" name="trash-outline" />
+        </ion-button>
+        }
+      </ion-item>
+      }
+    </ion-list>
+    } @if (editingError(); as error) {
+    <ion-note color="danger" class="field-error">{{ error }}</ion-note>
+    }
+  </div>
+</ion-content>

@@ -13,6 +13,17 @@ solicitados por la prueba.
 
 ### Añadido
 
+- Categorías: crear, renombrar y eliminar, con color elegible de una paleta fija.
+- Nombre de categoría único.
+- Asignación de categoría a cada tarea, tanto al crearla como después.
+- Filtrado de tareas por categoría.
+- Contador de tareas pendientes por categoría.
+- Barra de pestañas inferior para alternar entre Tareas y Categorías.
+- Sección de tareas completadas al final de la lista.
+- Botón flotante que revela el formulario.
+
+### Añadido en el estado reactivo
+
 - Estado reactivo con `SignalStore` de `@ngrx/signals`. El estado guarda únicamente
   las tareas y el filtro activo; la lista visible, el contador de pendientes y la
   condición de lista vacía se derivan con `computed` y no se almacenan.

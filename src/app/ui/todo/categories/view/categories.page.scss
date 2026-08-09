@@ -1,0 +1,52 @@
+.page {
+  width: 100%;
+  max-width: 44rem;
+  margin-inline: auto;
+  padding-block-end: 2rem;
+}
+
+ion-segment {
+  max-width: 100%;
+}
+
+.field {
+  padding: 0.75rem 1rem 0.25rem;
+}
+
+.field-label {
+  display: block;
+  margin-block-end: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ion-color-medium);
+}
+
+.field-error {
+  display: block;
+  padding-inline: 1rem;
+  padding-block-end: 0.5rem;
+}
+
+.picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+.dot {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  margin-inline-end: 0.4rem;
+  vertical-align: baseline;
+  flex-shrink: 0;
+}
+
+.dot--large {
+  width: 0.85rem;
+  height: 0.85rem;
+  margin-inline-end: 0.75rem;
+}

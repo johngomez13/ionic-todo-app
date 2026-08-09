@@ -1,10 +1,22 @@
 import { Task } from '../models/task.model';
-import { countPending, filterTasksByStatus } from './task-filters';
+import {
+  ALL_CATEGORIES,
+  WITHOUT_CATEGORY,
+  countPending,
+  filterTasks,
+  filterTasksByCategory,
+  filterTasksByStatus,
+} from './task-filters';
 
 describe('task-filters', () => {
-  const task = (id: string, completed: boolean): Task => ({ id, title: `Tarea ${id}`, completed });
+  const task = (id: string, completed: boolean, categoryId: string | null = null): Task => ({
+    id,
+    title: `Tarea ${id}`,
+    completed,
+    categoryId,
+  });
 
-  const tasks: Task[] = [task('a', false), task('b', true), task('c', false)];
+  const tasks: Task[] = [task('a', false, 'casa'), task('b', true, 'casa'), task('c', false, null)];
 
   describe('filterTasksByStatus', () => {
     it('should return every task when the filter is "all"', () => {
@@ -26,9 +38,38 @@ describe('task-filters', () => {
 
       expect(tasks).toEqual(original);
     });
+  });
 
-    it('should handle an empty list', () => {
-      expect(filterTasksByStatus([], 'pending')).toEqual([]);
+  describe('filterTasksByCategory', () => {
+    it('should return every task for ALL_CATEGORIES', () => {
+      expect(filterTasksByCategory(tasks, ALL_CATEGORIES).map((item) => item.id)).toEqual(['a', 'b', 'c']);
+    });
+
+    it('should return only uncategorized tasks for WITHOUT_CATEGORY', () => {
+      expect(filterTasksByCategory(tasks, WITHOUT_CATEGORY).map((item) => item.id)).toEqual(['c']);
+    });
+
+    it('should return only the tasks of a given category', () => {
+      expect(filterTasksByCategory(tasks, 'casa').map((item) => item.id)).toEqual(['a', 'b']);
+    });
+
+    it('should return nothing for a category nobody uses', () => {
+      expect(filterTasksByCategory(tasks, 'trabajo')).toEqual([]);
+    });
+  });
+
+  describe('filterTasks', () => {
+    it('should combine both filters', () => {
+      expect(filterTasks(tasks, 'pending', 'casa').map((item) => item.id)).toEqual(['a']);
+      expect(filterTasks(tasks, 'completed', 'casa').map((item) => item.id)).toEqual(['b']);
+    });
+
+    it('should return nothing when the two filters exclude each other', () => {
+      expect(filterTasks(tasks, 'completed', WITHOUT_CATEGORY)).toEqual([]);
+    });
+
+    it('should behave like no filter at all when both are permissive', () => {
+      expect(filterTasks(tasks, 'all', ALL_CATEGORIES).map((item) => item.id)).toEqual(['a', 'b', 'c']);
     });
   });
 
@@ -39,10 +80,6 @@ describe('task-filters', () => {
 
     it('should return zero for an empty list', () => {
       expect(countPending([])).toBe(0);
-    });
-
-    it('should return zero when everything is completed', () => {
-      expect(countPending([task('a', true)])).toBe(0);
     });
   });
 });

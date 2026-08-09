@@ -22,7 +22,7 @@ describe('TaskStorageService', () => {
   });
 
   it('should read back what it saved', () => {
-    const tasks: Task[] = [{ id: 'a', title: 'Comprar pan', completed: false }];
+    const tasks: Task[] = [{ id: 'a', title: 'Comprar pan', completed: false, categoryId: null }];
 
     service.save(tasks);
 

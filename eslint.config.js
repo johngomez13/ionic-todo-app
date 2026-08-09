@@ -73,8 +73,12 @@ module.exports = tseslint.config(
     },
   },
   {
-    // Si el bootstrap falla no hay aplicación donde reportar el error: la consola
-    // es el único canal disponible. Es el único punto del proyecto donde se permite.
+    files: ['src/app/ui/**/state/**/*.ts'],
+    rules: {
+      '@typescript-eslint/consistent-type-definitions': 'off',
+    },
+  },
+  {
     files: ['src/main.ts'],
     rules: {
       'no-console': 'off',
