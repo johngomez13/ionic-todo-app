@@ -13,6 +13,11 @@ solicitados por la prueba.
 
 ### Añadido
 
+- Scripts `preview`compila en producción y sirve la aplicación con compresión y fallback de rutas, como haría un hosting real; el segundo la audita.
+- Desplazamiento virtual en la lista de tareas pendientes.
+
+### Añadido en el CI y los binarios
+
 - Flujo de integración continua que compila la aplicación para iOS en un runner de macOS y publica el IPA como artefacto descargable. Sale sin firmar.
 - Configuración de firma del APK de release: `build.example.json` como plantilla versionada, con las credenciales reales y el keystore fuera del control de versiones.
 - APK de release firmado.

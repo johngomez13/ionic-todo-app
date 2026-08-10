@@ -84,3 +84,12 @@
   flex-wrap: wrap;
   gap: 0.5rem 1.25rem;
 }
+
+.task-viewport {
+  height: calc(100dvh - 17rem);
+  min-height: 12rem;
+}
+
+.task-viewport ion-item {
+  height: 3.5rem;
+}

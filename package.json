@@ -16,7 +16,9 @@
     "lint:fix": "ng lint --fix",
     "format": "prettier --write \"src/**/*.{ts,html,scss,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss,json}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "preview": "ng build --configuration production && serve www -s -l 4173",
+    "build:android": "ng build --configuration production && cordova build android --release"
   },
   "private": true,
   "dependencies": {
@@ -80,6 +82,7 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "lint-staged": "^17.3.0",
     "prettier": "^3.9.6",
+    "serve": "^14.2.6",
     "typescript": "~5.9.0",
     "typescript-eslint": "^8.66.0"
   },
@@ -127,8 +130,8 @@
       }
     },
     "platforms": [
-      "android",
-      "ios"
+      "ios",
+      "android"
     ]
   }
 }

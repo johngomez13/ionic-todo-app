@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  afterNextRender,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   IonButton,
@@ -36,6 +45,8 @@ import {
 import { CategoryChip, CategoryOption, TaskView } from '@ui/todo/shared/models/task-view.model';
 import { TodoStore } from '@ui/todo/state/store/todo.store';
 
+const TASK_ROW_HEIGHT = 56;
+
 @Component({
   selector: 'app-tasks',
   templateUrl: './tasks.page.html',
@@ -43,6 +54,7 @@ import { TodoStore } from '@ui/todo/state/store/todo.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
+    ScrollingModule,
     IonButton,
     IonCheckbox,
     IonContent,
@@ -90,9 +102,18 @@ export default class TasksPage {
     resolveEmptyMessage(this.store.tasks().length, this.pendingTasks().length, this.completedTasks().length),
   );
   public readonly canAddTask = computed(() => normalizeTitle(this.draft()).length > 0);
+  public readonly rowHeight = TASK_ROW_HEIGHT;
+  private readonly viewport = viewChild(CdkVirtualScrollViewport);
 
   constructor() {
     addIcons({ addOutline, chevronDownOutline, chevronForwardOutline, pricetagOutline, trashOutline });
+    afterNextRender(() => {
+      this.viewport()?.checkViewportSize();
+    });
+  }
+
+  public trackById(_index: number, task: TaskView): string {
+    return task.id;
   }
 
   public selectCategory(value: string): void {

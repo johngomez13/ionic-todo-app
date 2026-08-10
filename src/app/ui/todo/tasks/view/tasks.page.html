@@ -50,9 +50,8 @@
     } @if (emptyMessage(); as message) {
     <p class="empty">{{ message }}</p>
     } @if (pendingTasks().length > 0) {
-    <ion-list>
-      @for (task of pendingTasks(); track task.id) {
-      <ion-item>
+    <cdk-virtual-scroll-viewport class="task-viewport" [itemSize]="rowHeight">
+      <ion-item *cdkVirtualFor="let task of pendingTasks(); trackBy: trackById">
         @if (assigningId() === task.id) {
         <ion-radio-group
           class="picker"
@@ -100,8 +99,7 @@
         </ion-button>
         }
       </ion-item>
-      }
-    </ion-list>
+    </cdk-virtual-scroll-viewport>
     } @if (hasCompleted()) {
     <ion-item button lines="none" class="disclosure" (click)="toggleCompleted()">
       <ion-icon
