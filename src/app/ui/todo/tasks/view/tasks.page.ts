@@ -103,6 +103,9 @@ export default class TasksPage {
   );
   public readonly canAddTask = computed(() => normalizeTitle(this.draft()).length > 0);
   public readonly rowHeight = TASK_ROW_HEIGHT;
+  public readonly viewportHeight = computed(
+    () => `min(calc(100dvh - 17rem), ${String(this.pendingTasks().length * TASK_ROW_HEIGHT)}px)`,
+  );
   private readonly viewport = viewChild(CdkVirtualScrollViewport);
 
   constructor() {

@@ -50,7 +50,7 @@
     } @if (emptyMessage(); as message) {
     <p class="empty">{{ message }}</p>
     } @if (pendingTasks().length > 0) {
-    <cdk-virtual-scroll-viewport class="task-viewport" [itemSize]="rowHeight">
+    <cdk-virtual-scroll-viewport class="task-viewport" [itemSize]="rowHeight" [style.height]="viewportHeight()">
       <ion-item *cdkVirtualFor="let task of pendingTasks(); trackBy: trackById">
         @if (assigningId() === task.id) {
         <ion-radio-group
@@ -79,6 +79,7 @@
           </span>
           }
         </ion-checkbox>
+        @if (showsCategories()) {
         <ion-button
           slot="end"
           fill="clear"
@@ -88,6 +89,7 @@
         >
           <ion-icon slot="icon-only" name="pricetag-outline" />
         </ion-button>
+        }
         <ion-button
           slot="end"
           fill="clear"
