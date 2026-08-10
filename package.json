@@ -31,6 +31,7 @@
     "@angular/router": "20.3.25",
     "@ionic/angular": "^8.0.0",
     "@ngrx/signals": "^20.1.0",
+    "firebase": "^12.17.1",
     "ionicons": "^7.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
@@ -47,10 +48,20 @@
     "@angular/language-service": "20.3.25",
     "@eslint/js": "^9.39.5",
     "@ionic/angular-toolkit": "^12.0.0",
+    "@ionic/cordova-builders": "12.3.0",
     "@types/jasmine": "~5.1.0",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
     "angular-eslint": "^20.7.0",
+    "cordova-android": "^15.1.0",
+    "cordova-ios": "^8.1.1",
+    "cordova-plugin-device": "2.0.2",
+    "cordova-plugin-firebasex-config": "^2.0.0",
+    "cordova-plugin-firebasex-messaging": "^2.0.1",
+    "cordova-plugin-ionic-keyboard": "^2.0.5",
+    "cordova-plugin-ionic-webview": "^5.0.0",
+    "cordova-plugin-splashscreen": "5.0.2",
+    "cordova-plugin-statusbar": "^2.4.2",
     "eslint": "^9.16.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.29.1",
@@ -92,6 +103,32 @@
     ],
     "src/**/*.{scss,json}": [
       "prettier --write"
+    ]
+  },
+  "cordova": {
+    "plugins": {
+      "cordova-plugin-statusbar": {},
+      "cordova-plugin-device": {},
+      "cordova-plugin-splashscreen": {},
+      "cordova-plugin-ionic-webview": {},
+      "cordova-plugin-ionic-keyboard": {},
+      "cordova-plugin-firebasex-config": {
+        "ANDROID_FIREBASE_CONFIG_VERSION": "23.1.0",
+        "IOS_FIREBASE_SDK_VERSION": "12.14.0"
+      },
+      "cordova-plugin-firebasex-messaging": {
+        "FIREBASE_FCM_AUTOINIT_ENABLED": "true",
+        "FIREBASE_MESSAGING_IMMEDIATE_PAYLOAD_DELIVERY": "false",
+        "IOS_FCM_ENABLED": "true",
+        "IOS_ENABLE_CRITICAL_ALERTS_ENABLED": "false",
+        "ANDROID_ICON_ACCENT": "#FFFFFF",
+        "ANDROID_FIREBASE_MESSAGING_VERSION": "25.0.2",
+        "IOS_FIREBASE_SDK_VERSION": "12.14.0"
+      }
+    },
+    "platforms": [
+      "ios",
+      "android"
     ]
   }
 }

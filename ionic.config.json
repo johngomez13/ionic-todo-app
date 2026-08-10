@@ -1,4 +1,8 @@
 {
   "name": "ionic-todo-app",
-  "type": "angular-standalone"
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular-standalone",
+  "npmClient": "pnpm"
 }

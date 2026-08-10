@@ -13,6 +13,31 @@ solicitados por la prueba.
 
 ### Añadido
 
+- Firebase Remote Config como bandera de funcionalidad: `ff_categories_enabled` decide si
+  la aplicación muestra las categorías o degrada a una lista simple.
+- Dos implementaciones del mismo contrato de banderas, elegidas según la plataforma: el SDK
+  web de Firebase en navegador y `cordova-plugin-firebasex` dentro del WebView, donde el SDK
+  web no funciona por servirse el contenido desde `file://`.
+- Implementación por defecto sin Firebase, que devuelve los valores locales y permite que la
+  aplicación arranque y funcione sin credenciales configuradas.
+- Carga de las banderas después del primer pintado con `afterNextRender`, de modo que una
+  respuesta lenta no retrase la aparición de la aplicación.
+- `google-services.json` versionado: no es un secreto y `cordova-android` lo necesita para
+  compilar el APK.
+
+### Añadido en las plataformas nativas
+
+- Plataformas nativas de Cordova para Android e iOS.
+- Pantalla de arranque de Android migrada a la API de Android 12, que sustituye a las
+  etiquetas `splash` que `cordova-android` 15 ya no admite.
+- `node-linker=hoisted` en la configuración de pnpm: Cordova ejecuta npm internamente al
+  añadir plataformas y plugins, y npm no sabe leer el árbol de enlaces simbólicos que pnpm
+  crea por defecto.
+- Objetivos `ionic-cordova-build` e `ionic-cordova-serve` en la configuración de Angular,
+  que el CLI de Ionic no registra por sí solo en proyectos standalone.
+
+### Añadido en categorías y filtrado
+
 - Categorías: crear, renombrar y eliminar, con color elegible de una paleta fija.
 - Nombre de categoría único.
 - Asignación de categoría a cada tarea, tanto al crearla como después.

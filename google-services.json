@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "398913238424",
+    "project_id": "prueba-todo-ce72f",
+    "storage_bucket": "prueba-todo-ce72f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:398913238424:android:0105e060e3b7bff9af67ed",
+        "android_client_info": {
+          "package_name": "io.github.johngomez13.todo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwNGq7cMIpEDOTYtyEiuhwfxlN_RL18Uo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

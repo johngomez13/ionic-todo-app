@@ -20,6 +20,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { addOutline, chevronDownOutline, chevronForwardOutline, pricetagOutline, trashOutline } from 'ionicons/icons';
+import { FeatureFlagsService } from '@application/feature-flags/feature-flags.service';
 import { normalizeTitle } from '@domain/models/task.model';
 import { ALL_CATEGORIES, WITHOUT_CATEGORY } from '@domain/services/task-filters';
 import {
@@ -62,11 +63,14 @@ import { TodoStore } from '@ui/todo/state/store/todo.store';
 })
 export default class TasksPage {
   private readonly store = inject(TodoStore);
+  private readonly flags = inject(FeatureFlagsService);
   public readonly draft = signal('');
   public readonly isAdding = signal(false);
   public readonly showCompleted = signal(false);
   public readonly assigningId = signal<string | null>(null);
   public readonly categoryFilter = this.store.categoryFilter;
+  public readonly categoriesEnabled = this.flags.categoriesEnabled;
+  public readonly showsCategories = computed(() => this.categoriesEnabled() && this.store.categoryCount() > 0);
   public readonly chips = computed<CategoryChip[]>(() =>
     buildCategoryChips(this.store.categories(), this.store.pendingByCategory()),
   );
@@ -79,7 +83,9 @@ export default class TasksPage {
   public readonly hasCompleted = computed(() => this.completedTasks().length > 0);
   public readonly completedLabel = computed(() => formatCompletedLabel(this.completedTasks().length));
   public readonly pendingLabel = computed(() => formatPendingLabel(this.store.pendingCount()));
-  public readonly showsCategoryOnRow = computed(() => this.categoryFilter() === ALL_CATEGORIES);
+  public readonly showsCategoryOnRow = computed(
+    () => this.showsCategories() && this.categoryFilter() === ALL_CATEGORIES,
+  );
   public readonly emptyMessage = computed(() =>
     resolveEmptyMessage(this.store.tasks().length, this.pendingTasks().length, this.completedTasks().length),
   );

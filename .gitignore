@@ -87,3 +87,7 @@ PLAN-*.md
 
 # Análisis de bundle
 stats.json
+
+# Cordova invoca npm por dentro (cordova-fetch) y regenera este lockfile.
+# La fuente de verdad de dependencias es pnpm-lock.yaml.
+package-lock.json

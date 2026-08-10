@@ -2,6 +2,9 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { CATEGORY_REPOSITORY } from '@application/providers/category.provider';
+import { FEATURE_FLAG_REPOSITORY, provideFeatureFlagRepository } from '@application/providers/feature-flag.provider';
+import { FeatureFlagsService } from '@application/feature-flags/feature-flags.service';
+import { FeatureFlagRepository } from '@domain/repositories/feature-flag.repository';
 import { TASK_REPOSITORY } from '@application/providers/task.provider';
 import { Category } from '@domain/models/category.model';
 import { Task } from '@domain/models/task.model';
@@ -35,6 +38,20 @@ class InMemoryCategoryRepository implements CategoryRepository {
   }
 }
 
+class DisabledFlagsRepository implements FeatureFlagRepository {
+  public initialize(): Promise<void> {
+    return Promise.resolve();
+  }
+
+  public refresh(): Promise<void> {
+    return Promise.resolve();
+  }
+
+  public isEnabled(): boolean {
+    return false;
+  }
+}
+
 describe('TasksPage', () => {
   const casa: Category = { id: 'casa', name: 'Casa', color: '#e11d48' };
   const trabajo: Category = { id: 'trabajo', name: 'Trabajo', color: '#0ea5e9' };
@@ -48,6 +65,7 @@ describe('TasksPage', () => {
       providers: [
         provideZonelessChangeDetection(),
         provideRouter([]),
+        provideFeatureFlagRepository(),
         { provide: TASK_REPOSITORY, useValue: repository },
         { provide: CATEGORY_REPOSITORY, useValue: new InMemoryCategoryRepository(categories) },
       ],
@@ -258,6 +276,48 @@ describe('TasksPage', () => {
 
     await addTask(fixture, 'Otra');
     expect(fixture.componentInstance.pendingLabel()).toBe('2 pendientes');
+  });
+
+  it('should degrade to a plain list when the categories flag is off', async () => {
+    await TestBed.configureTestingModule({
+      imports: [TasksPage],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        { provide: FEATURE_FLAG_REPOSITORY, useValue: new DisabledFlagsRepository() },
+        { provide: TASK_REPOSITORY, useValue: new InMemoryTaskRepository() },
+        { provide: CATEGORY_REPOSITORY, useValue: new InMemoryCategoryRepository([casa]) },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(TasksPage);
+    await TestBed.inject(FeatureFlagsService).load();
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.categoriesEnabled()).toBeFalse();
+    expect(fixture.componentInstance.showsCategories()).toBeFalse();
+    expect(fixture.componentInstance.showsCategoryOnRow()).toBeFalse();
+  });
+
+  it('should keep the categories of existing tasks while the flag is off, without destroying them', async () => {
+    const stored: Task[] = [{ id: 'a', title: 'De casa', completed: false, categoryId: 'casa' }];
+
+    await TestBed.configureTestingModule({
+      imports: [TasksPage],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        { provide: FEATURE_FLAG_REPOSITORY, useValue: new DisabledFlagsRepository() },
+        { provide: TASK_REPOSITORY, useValue: new InMemoryTaskRepository(stored) },
+        { provide: CATEGORY_REPOSITORY, useValue: new InMemoryCategoryRepository([casa]) },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(TasksPage);
+    await TestBed.inject(FeatureFlagsService).load();
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.pendingTasks()[0].categoryId).toBe('casa');
   });
 
   it('should hand every change to the repository', async () => {
