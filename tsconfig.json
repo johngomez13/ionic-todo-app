@@ -28,7 +28,6 @@
       "@domain/*": ["src/app/domain/*"],
       "@application/*": ["src/app/application/*"],
       "@infrastructure/*": ["src/app/infrastructure/*"],
-      "@shared/*": ["src/app/shared/*"],
       "@ui/*": ["src/app/ui/*"],
       "@env/*": ["src/environments/*"]
     }

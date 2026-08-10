@@ -13,8 +13,13 @@ solicitados por la prueba.
 
 ### Añadido
 
-- Scripts `preview`compila en producción y sirve la aplicación con compresión y fallback de rutas, como haría un hosting real; el segundo la audita.
+- Script `preview`: compila en producción y sirve la aplicación con compresión y fallback de rutas, como haría un hosting real.
 - Desplazamiento virtual en la lista de tareas pendientes.
+
+### Corregido
+
+- El `index.html` no cargaba `cordova.js`, así que `window.cordova` nunca existía.
+- El servicio nativo de Remote Config leía `FirebasePlugin` antes de que Cordova registrara los plugins y caía en silencio a los valores por defecto. Ahora espera a `deviceready`, con un temporizador de seguridad para no dejar la promesa colgada si el puente falla.
 
 ### Añadido en el CI y los binarios
 

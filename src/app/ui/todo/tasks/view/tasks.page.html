@@ -51,25 +51,10 @@
     <p class="empty">{{ message }}</p>
     } @if (pendingTasks().length > 0) {
     <cdk-virtual-scroll-viewport class="task-viewport" [itemSize]="rowHeight" [style.height]="viewportHeight()">
-      <ion-item *cdkVirtualFor="let task of pendingTasks(); trackBy: trackById">
-        @if (assigningId() === task.id) {
-        <ion-radio-group
-          class="picker"
-          [value]="task.categoryId ?? 'none'"
-          (ionChange)="onAssignChange(task.id, $event)"
-        >
-          @for (option of assignOptions(); track option.value) {
-          <ion-radio [value]="option.value" labelPlacement="end" justify="start">
-            @if (option.color; as color) {
-            <span class="dot" [style.background-color]="color" aria-hidden="true"></span>
-            } {{ option.label }}
-          </ion-radio>
-          }
-        </ion-radio-group>
-        <ion-button slot="end" fill="clear" color="medium" aria-label="Cancelar" (click)="cancelAssign()">
-          Cancelar
-        </ion-button>
-        } @else {
+      <ion-item
+        *cdkVirtualFor="let task of pendingTasks(); trackBy: trackById"
+        [class.row--assigning]="isAssigning(task.id)"
+      >
         <ion-checkbox justify="start" labelPlacement="end" [checked]="task.completed" (ionChange)="toggleTask(task.id)">
           <span class="task-title">{{ task.title }}</span>
           @if (showsCategoryOnRow() && task.categoryName) {
@@ -99,7 +84,6 @@
         >
           <ion-icon slot="icon-only" name="trash-outline" />
         </ion-button>
-        }
       </ion-item>
     </cdk-virtual-scroll-viewport>
     } @if (hasCompleted()) {
@@ -134,9 +118,27 @@
     } }
   </div>
 
+  @if (assigningTask(); as task) {
+  <div slot="fixed" class="sheet" role="group" [attr.aria-label]="task.assignLabel">
+    <div class="sheet-head">
+      <span class="sheet-title">{{ task.title }}</span>
+      <ion-button size="small" fill="clear" color="medium" (click)="cancelAssign()">Cancelar</ion-button>
+    </div>
+    <ion-radio-group class="picker" [value]="task.categoryId ?? 'none'" (ionChange)="onAssignChange(task.id, $event)">
+      @for (option of assignOptions(); track option.value) {
+      <ion-radio [value]="option.value" labelPlacement="end" justify="start">
+        @if (option.color; as color) {
+        <span class="dot" [style.background-color]="color" aria-hidden="true"></span>
+        } {{ option.label }}
+      </ion-radio>
+      }
+    </ion-radio-group>
+  </div>
+  } @else {
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
     <ion-fab-button aria-label="Nueva tarea" (click)="startAdding()">
       <ion-icon name="add-outline" />
     </ion-fab-button>
   </ion-fab>
+  }
 </ion-content>

@@ -92,6 +92,13 @@ export default class TasksPage {
   );
   public readonly pendingTasks = computed<TaskView[]>(() => pendingOf(this.visibleViews()) as TaskView[]);
   public readonly completedTasks = computed<TaskView[]>(() => completedOf(this.visibleViews()) as TaskView[]);
+  public readonly assigningTask = computed<TaskView | null>(() => {
+    const id = this.assigningId();
+
+    if (id === null) return null;
+
+    return this.pendingTasks().find((task) => task.id === id) ?? null;
+  });
   public readonly hasCompleted = computed(() => this.completedTasks().length > 0);
   public readonly completedLabel = computed(() => formatCompletedLabel(this.completedTasks().length));
   public readonly pendingLabel = computed(() => formatPendingLabel(this.store.pendingCount()));
@@ -117,6 +124,10 @@ export default class TasksPage {
 
   public trackById(_index: number, task: TaskView): string {
     return task.id;
+  }
+
+  public isAssigning(id: string): boolean {
+    return this.assigningId() === id;
   }
 
   public selectCategory(value: string): void {
@@ -148,6 +159,8 @@ export default class TasksPage {
   }
 
   public toggleTask(id: string): void {
+    if (this.assigningId() === id) this.cancelAssign();
+
     this.store.toggleTask(id);
   }
 

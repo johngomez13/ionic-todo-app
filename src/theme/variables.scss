@@ -1,2 +1,6 @@
 // For information on how to create your own theme, please refer to:
 // https://ionicframework.com/docs/theming/
+
+html.plt-android {
+  --ion-safe-area-top: 0px;
+}

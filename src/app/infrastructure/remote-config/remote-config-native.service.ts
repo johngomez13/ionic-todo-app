@@ -7,11 +7,14 @@ interface FirebasePlugin {
   getValue(key: string, success: (value: string) => void, error: (message: string) => void): void;
 }
 
+const DEVICE_READY_TIMEOUT_MS = 5000;
+
 @Injectable({ providedIn: 'root' })
 export class RemoteConfigNativeService implements FeatureFlagRepository {
   private values: Record<FeatureFlag, boolean> = { ...FEATURE_FLAG_DEFAULTS };
 
   public async initialize(): Promise<void> {
+    await this.deviceReady();
     await this.fetchAndActivate();
     await this.readFlags();
   }
@@ -22,6 +25,20 @@ export class RemoteConfigNativeService implements FeatureFlagRepository {
 
   public isEnabled(flag: FeatureFlag): boolean {
     return this.values[flag];
+  }
+
+  private deviceReady(): Promise<void> {
+    if (this.plugin() !== null) return Promise.resolve();
+
+    return new Promise((resolve) => {
+      const finish = (): void => {
+        clearTimeout(timer);
+        resolve();
+      };
+      const timer = setTimeout(finish, DEVICE_READY_TIMEOUT_MS);
+
+      document.addEventListener('deviceready', finish, { once: true });
+    });
   }
 
   private plugin(): FirebasePlugin | null {

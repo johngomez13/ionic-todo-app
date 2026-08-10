@@ -253,6 +253,23 @@ describe('TasksPage', () => {
     expect(fixture.componentInstance.pendingTasks()[0].categoryName).toBe('Casa');
   });
 
+  it('should render the category picker outside the virtual list', async () => {
+    const fixture = await createPage(new InMemoryTaskRepository(), [casa, trabajo]);
+    await addTask(fixture, 'Suelta');
+    const { id } = fixture.componentInstance.pendingTasks()[0];
+
+    fixture.componentInstance.startAssign(id);
+    await fixture.whenStable();
+
+    const host = fixture.nativeElement as HTMLElement;
+    const picker = host.querySelector('.picker');
+    const viewport = host.querySelector('cdk-virtual-scroll-viewport');
+
+    expect(picker).not.toBeNull();
+    expect(viewport).not.toBeNull();
+    expect(viewport?.contains(picker)).toBeFalse();
+  });
+
   it('should leave the assign mode when the task being assigned is removed', async () => {
     const fixture = await createPage(new InMemoryTaskRepository(), [casa]);
     await addTask(fixture, 'Suelta');
