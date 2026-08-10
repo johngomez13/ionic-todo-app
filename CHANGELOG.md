@@ -13,6 +13,17 @@ solicitados por la prueba.
 
 ### Añadido
 
+- Flujo de integración continua que compila la aplicación para iOS en un runner de macOS y publica el IPA como artefacto descargable. Sale sin firmar.
+- Configuración de firma del APK de release: `build.example.json` como plantilla versionada, con las credenciales reales y el keystore fuera del control de versiones.
+- APK de release firmado.
+
+### Cambiado
+
+- La versión mínima de iOS pasa a 15.0. La impone el SDK de Firebase, que declara ese mínimo en su paquete Swift; sin ello la resolución de dependencias falla en Xcode. La aplicación deja de soportar iOS 11 a 14.
+- El empaquetado de release produce un APK en lugar del bundle que `cordova-android` genera por defecto, porque la entrega pide un archivo instalable.
+
+### Añadido en Firebase y banderas
+
 - Firebase Remote Config como bandera de funcionalidad: `ff_categories_enabled` decide si
   la aplicación muestra las categorías o degrada a una lista simple.
 - Dos implementaciones del mismo contrato de banderas, elegidas según la plataforma: el SDK

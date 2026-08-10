@@ -46,21 +46,33 @@ jobs:
 
       - name: Compilar sin firmar
         run: |
+          set +e
           cordova build ios --release --device \
             --buildFlag="CODE_SIGN_IDENTITY=" \
             --buildFlag="CODE_SIGNING_REQUIRED=NO" \
             --buildFlag="CODE_SIGNING_ALLOWED=NO" \
             --buildFlag="DEVELOPMENT_TEAM="
+          set -e
 
-      # Un IPA es un zip con el .app dentro de una carpeta Payload. Sin firma no se puede
-      # instalar en un dispositivo, pero es un artefacto real y verificable.
+          ARCHIVE="$(find platforms/ios -name '*.xcarchive' -maxdepth 2 -type d | head -1)"
+
+          if [ -z "$ARCHIVE" ]; then
+            echo "La compilación no produjo ningún archive"
+            exit 1
+          fi
+
+          echo "ARCHIVE_PATH=$ARCHIVE" >> "$GITHUB_ENV"
+          echo "Archive generado en: $ARCHIVE"
+
+      # Un IPA es un zip con el .app dentro de una carpeta Payload. Se toma directamente
+      # del archive, sin pasar por exportArchive, que es el paso que exige firma.
       - name: Empaquetar el IPA
         run: |
-          APP_PATH="$(find platforms/ios/build -name '*.app' -maxdepth 3 -type d | head -1)"
+          APP_PATH="$(find "$ARCHIVE_PATH/Products/Applications" -name '*.app' -maxdepth 1 -type d | head -1)"
 
           if [ -z "$APP_PATH" ]; then
-            echo "No se encontró ningún .app compilado"
-            find platforms/ios/build -maxdepth 3 -type d
+            echo "No se encontró ningún .app dentro del archive"
+            find "$ARCHIVE_PATH" -maxdepth 3
             exit 1
           fi
 
