@@ -91,3 +91,9 @@ stats.json
 # Cordova invoca npm por dentro (cordova-fetch) y regenera este lockfile.
 # La fuente de verdad de dependencias es pnpm-lock.yaml.
 package-lock.json
+
+# Credenciales de firma del APK de release. La plantilla versionada es
+# build.example.json; el keystore vive fuera del repositorio.
+build.json
+*.jks
+*.keystore

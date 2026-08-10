@@ -1,0 +1,12 @@
+{
+  "android": {
+    "release": {
+      "keystore": "RUTA/A/TU/keystore.jks",
+      "storePassword": "TU_CONTRASENA_DEL_ALMACEN",
+      "alias": "TU_ALIAS",
+      "password": "TU_CONTRASENA_DE_LA_CLAVE",
+      "keystoreType": "jks",
+      "packageType": "apk"
+    }
+  }
+}

@@ -1,0 +1,82 @@
+name: Build iOS
+
+# El IPA se genera en un runner de macOS porque el proyecto se desarrolla en Windows y
+# compilar para iOS exige Xcode. Sale sin firmar: firmarlo requiere una cuenta de Apple
+# Developer de pago, que queda fuera del alcance de esta prueba.
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/task-categories]
+    paths-ignore:
+      - '**/*.md'
+
+jobs:
+  ipa:
+    name: Compilar y empaquetar IPA sin firmar
+    runs-on: macos-latest
+
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Verificar antes de compilar
+        run: |
+          pnpm lint
+          pnpm build:prod
+
+      - name: Instalar el CLI de Cordova
+        run: pnpm add -g cordova@13
+
+      # platforms/ está en .gitignore por ser un artefacto reproducible, así que la
+      # plataforma se genera aquí a partir de config.xml y de package.json.
+      - name: Añadir la plataforma iOS
+        run: cordova platform add ios
+
+      - name: Compilar sin firmar
+        run: |
+          cordova build ios --release --device \
+            --buildFlag="CODE_SIGN_IDENTITY=" \
+            --buildFlag="CODE_SIGNING_REQUIRED=NO" \
+            --buildFlag="CODE_SIGNING_ALLOWED=NO" \
+            --buildFlag="DEVELOPMENT_TEAM="
+
+      # Un IPA es un zip con el .app dentro de una carpeta Payload. Sin firma no se puede
+      # instalar en un dispositivo, pero es un artefacto real y verificable.
+      - name: Empaquetar el IPA
+        run: |
+          APP_PATH="$(find platforms/ios/build -name '*.app' -maxdepth 3 -type d | head -1)"
+
+          if [ -z "$APP_PATH" ]; then
+            echo "No se encontró ningún .app compilado"
+            find platforms/ios/build -maxdepth 3 -type d
+            exit 1
+          fi
+
+          echo "Empaquetando: $APP_PATH"
+          mkdir -p build/Payload
+          cp -R "$APP_PATH" build/Payload/
+          cd build
+          zip -qr Tareas-unsigned.ipa Payload
+          ls -lh Tareas-unsigned.ipa
+
+      - name: Publicar el IPA como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: ipa-sin-firmar
+          path: build/Tareas-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 30
