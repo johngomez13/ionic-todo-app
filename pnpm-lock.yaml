@@ -111,6 +111,12 @@ importers:
       cordova-plugin-device:
         specifier: 2.0.2
         version: 2.0.2
+      cordova-plugin-firebasex-config:
+        specifier: ^2.0.0
+        version: 2.0.0
+      cordova-plugin-firebasex-messaging:
+        specifier: ^2.0.1
+        version: 2.0.1
       cordova-plugin-ionic-keyboard:
         specifier: ^2.0.5
         version: 2.2.0
@@ -3289,6 +3295,18 @@ packages:
     resolution: {integrity: sha512-R5cQod5kc4rVCrKW5ciZf1w//qW/LOrNXEs8tOABN6OxHF/pG3JavCIlNPmbiS7GIniIuC5OeAUrKTgdltirjg==}
     engines: {cordovaDependencies: {3.0.0: {cordova: '>100'}}}
 
+  cordova-plugin-firebasex-config@2.0.0:
+    resolution: {integrity: sha512-ZIAGVQaQg8ajryaOHHmmMCFewSThrymdNEfyNJGYhGQa07IzyJ1Gof92Nr9sHu+3qyTy9+xxrOO2bvV/EAuNNQ==}
+    engines: {cordovaDependencies: {1.0.0: {cordova: '>=12', cordova-android: '>=14', cordova-ios: '>=7'}}}
+
+  cordova-plugin-firebasex-core@2.0.0:
+    resolution: {integrity: sha512-4K09ipyVBOdXL1WkaIurqFyk5rOPlOuI2m7n3bYdajl7j6GMma3gDFJMV1/9URybezaXTViFbqMdbxOZJwejaA==}
+    engines: {cordovaDependencies: {1.0.0: {cordova: '>=12.0.0', cordova-android: '>=14.0.0', cordova-ios: '>=7.0.0'}}}
+
+  cordova-plugin-firebasex-messaging@2.0.1:
+    resolution: {integrity: sha512-cFfBqIO8RynDrcbXRm5Nun+UuozxDrcoPuW408QybSwGX/5xK8Ox7ponikoAo/yf9kYBD5g2dWz1LqUmfgX5uA==}
+    engines: {cordovaDependencies: {1.0.0: {cordova: '>=12', cordova-android: '>=14', cordova-ios: '>=7'}}}
+
   cordova-plugin-ionic-keyboard@2.2.0:
     resolution: {integrity: sha512-yDUG+9ieKVRitq5mGlNxjaZh/MgEhFFIgTIPhqSbUaQ8UuZbawy5mhJAVClqY97q8/rcQtL6dCDa7x2sEtCLcA==}
 
@@ -6211,6 +6229,10 @@ packages:
   xcode@3.0.1:
     resolution: {integrity: sha512-kCz5k7J7XbJtjABOvkc5lJmkiDh8VhjVCGNiqdKCscmVpdVUpEAyXv1xmCLkQJ5dsHqx3IPO4XW+NTDhU/fatA==}
     engines: {node: '>=10.0.0'}
+
+  xml-js@1.6.11:
+    resolution: {integrity: sha512-7rVi2KMfwfWFl+GpPg6m80IVMWXLRjO+PxTq7V2CDhoGak0wzYzFgUY2m4XJ47OGdXd8eLE8EmwfAmdjw7lC1g==}
+    hasBin: true
 
   xmlbuilder@15.1.1:
     resolution: {integrity: sha512-yMqGBqtXyeN1e3TGYvgNgDVZ3j84W4cwkOXQswghol6APgZWaff9lnbvN7MHYJOiXsvGPXtjTYJEiC9J2wv9Eg==}
@@ -9735,6 +9757,20 @@ snapshots:
 
   cordova-plugin-device@2.0.2: {}
 
+  cordova-plugin-firebasex-config@2.0.0:
+    dependencies:
+      cordova-plugin-firebasex-core: 2.0.0
+
+  cordova-plugin-firebasex-core@2.0.0:
+    dependencies:
+      plist: 3.1.1
+      xcode: 3.0.1
+      xml-js: 1.6.11
+
+  cordova-plugin-firebasex-messaging@2.0.1:
+    dependencies:
+      cordova-plugin-firebasex-core: 2.0.0
+
   cordova-plugin-ionic-keyboard@2.2.0: {}
 
   cordova-plugin-ionic-webview@5.0.1: {}
@@ -12242,8 +12278,7 @@ snapshots:
 
   sax@1.1.4: {}
 
-  sax@1.6.1:
-    optional: true
+  sax@1.6.1: {}
 
   schema-utils@4.3.3:
     dependencies:
@@ -13092,6 +13127,10 @@ snapshots:
     dependencies:
       simple-plist: 1.3.1
       uuid: 7.0.3
+
+  xml-js@1.6.11:
+    dependencies:
+      sax: 1.6.1
 
   xmlbuilder@15.1.1: {}
 
